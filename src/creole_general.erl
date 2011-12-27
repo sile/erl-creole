@@ -1,7 +1,15 @@
 -module(creole_general).
 
--export([to_unicode_string/2]).
+-export([to_unicode_string/2,
+         from_unicode_string/2]).
 
+from_unicode_string(String, Encoding) ->
+    Mod = case Encoding of
+              cp932 -> creole_to_cp932
+            end,
+    lists:append([Mod:table(Code) || Code <- String]).
+
+%% TODO: create binary version
 to_unicode_string(Octets, Encoding) ->
     Nodes = case Encoding of
                 cp932 -> creole_from_cp932:da_nodes()
@@ -29,7 +37,6 @@ to_unicode([Arc|Octets], Nodes, NodeIndex) ->
             {$?, Octets}
     end.
             
-
 base(Nodes, Index) ->
     element(Index+1, Nodes) band 16#00FFFFFF.
 
