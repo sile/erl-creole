@@ -5,7 +5,9 @@
 
 from_string(String, Encoding, ErrFn) ->
     ToBytes = case Encoding of
-                  cp932 -> fun creole_to_cp932:to_bytes/1
+                  cp932 -> fun creole_to_cp932:to_bytes/1;
+                  eucjp -> fun creole_to_eucjp:to_bytes/1;
+                  sjis -> fun creole_to_sjis:to_bytes/1
               end,
 
     from_string_impl(String, ToBytes, ErrFn, []).
@@ -24,7 +26,9 @@ from_string_impl([Code|Rest]=String, ToBytes, ErrFn, Acc) ->
 
 to_string(Bytes, Encoding, ErrFn) ->
     Nodes = case Encoding of
-                cp932 -> creole_from_cp932:da_nodes()
+                cp932 -> creole_from_cp932:da_nodes();
+                eucjp -> creole_from_eucjp:da_nodes();
+                sjis -> creole_from_sjis:da_nodes()
             end,
     to_string_impl(Bytes, Nodes, ErrFn, []).
 
