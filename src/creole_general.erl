@@ -8,7 +8,7 @@ from_string(String, Encoding, ErrFn) ->
                   cp932 -> fun creole_to_cp932:to_bytes/1;
                   eucjp -> fun creole_to_eucjp:to_bytes/1;
                   sjis -> fun creole_to_sjis:to_bytes/1;
-                  jisx_0208_1990 -> fun creole_to_jisx_0208_1990:to_bytes/1
+                  jisx_0208_1983 -> fun creole_to_jisx_0208_1983:to_bytes/1
               end,
     from_string_impl(String, ToBytes, ErrFn, []).
 
@@ -34,7 +34,7 @@ to_string(Bytes, Encoding, ErrFn) ->
                 cp932 -> creole_from_cp932:da_nodes();
                 eucjp -> creole_from_eucjp:da_nodes();
                 sjis -> creole_from_sjis:da_nodes();
-                jisx_0208_1990 -> creole_from_jisx_0208_1990:da_nodes()
+                jisx_0208_1983 -> creole_from_jisx_0208_1983:da_nodes()
             end,
     to_string_impl(Bytes, Nodes, ErrFn, []).
 
