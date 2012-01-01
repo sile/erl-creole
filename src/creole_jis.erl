@@ -2,11 +2,42 @@
 
 -export([from_string/2, to_string/2]).
 
-from_string(_String, _ErrFn) ->
-    ok.
+from_string(String, ErrFn) ->
+    from_string_impl(String, ErrFn, ascii, []).
 
-to_string(String, ErrFn) ->
-    to_string_impl(String, ErrFn, ascii, []).
+from_string_impl([], ErrFn, Mode, Acc) when Mode=/=ascii ->
+    from_string_impl([], ErrFn, ascii, [<<"\e(B">>|Acc]);
+from_string_impl([], _, _, Acc) ->
+    binary:list_to_bin(lists:reverse(Acc));
+from_string_impl([C|Rest], ErrFn, Mode, Acc) when C =< 16#FF ->
+    case Mode of
+        ascii ->
+            from_string_impl(Rest, ErrFn, ascii, [C|Acc]);
+        _ ->
+            from_string_impl(Rest, ErrFn, ascii, [C,<<"\e(b">>|Acc])
+    end;
+from_string_impl([C|Rest]=Str, ErrFn, Mode, Acc) ->
+    case {creole_to_jisx_0208_1983:to_bytes(C), Mode} of
+        {fail, _} -> 
+            {S, Rest2, Continue} = ErrFn(Str),
+            S2 = case Mode of
+                     ascii -> S;
+                     _ -> [<<"\e(b">>|S] % XXX: It is incorrect if S isn't ascii sequence.
+                 end,
+            case Continue of
+                true ->
+                    from_string_impl(Rest2, ErrFn, ascii, [S2|Acc]);
+                false ->
+                    {abort, from_string_impl([], ErrFn, ascii, [S2|Acc]), Rest2}
+            end;
+        {Bytes, jisx_0208_1983} ->
+            from_string_impl(Rest, ErrFn, jisx_0208_1983, [Bytes|Acc]);
+        {Bytes, _} ->
+            from_string_impl(Rest, ErrFn, jisx_0208_1983, [Bytes,<<"\e$B">>|Acc])
+    end.
+
+to_string(Bytes, ErrFn) ->
+    to_string_impl(Bytes, ErrFn, ascii, []).
 
 to_string_impl(<<>>, _, _, Acc) ->
    lists:flatten(lists:reverse(Acc));
@@ -29,6 +60,7 @@ to_string_impl(Bytes, ErrFn, Mode, Acc) ->
         <<"\e$B", Rest/binary>> ->  
             to_string_impl(Rest, ErrFn, jisx_0208_1983, Acc);
 
+        %% Non Escape sequence
         _ ->
             to_string_impl2(Bytes, ErrFn, Mode, Acc)
     end.
@@ -40,7 +72,6 @@ to_string_impl2(<<B:1/binary, Rest/binary>>=Bytes, ErrFn, ascii, Acc) ->
         _ ->
             handle_error(Bytes, ErrFn, ascii, Acc)
     end;
-
 to_string_impl2(<<B:1/binary, Rest/binary>>=Bytes, ErrFn, roman, Acc) ->
     case binary:first(B) of
         $\ ->
@@ -52,7 +83,6 @@ to_string_impl2(<<B:1/binary, Rest/binary>>=Bytes, ErrFn, roman, Acc) ->
         _ ->
             handle_error(Bytes, ErrFn, roman, Acc)
     end;
-
 to_string_impl2(Bytes, ErrFn, jisx_0208_1983, Acc) ->
     ErrFn2 = fun (<<"\e", _/binary>>=Bs) ->
                      {[], Bs, false};
