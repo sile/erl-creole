@@ -23,20 +23,29 @@
         SUM (ash (read-byte in) (* i 8))))
 
 (defun read-mapping (path)
-  (with-open-file (in path)
-    (loop WITH unicode->bytes = '()
-          WITH bytes->unicode = '()
-          FOR unicode = (read in nil nil)
-          WHILE unicode
-          FOR bytes = (to-bytes (read in))
-          FOR prio = (read in)
-      DO
-      (when (zerop prio)
-        (push (list bytes unicode) bytes->unicode))
-      (push (list unicode bytes) unicode->bytes)
-      FINALLY
-      (return (values (sort unicode->bytes #'< :key #'first)
-                      (sort bytes->unicode #'bytes< :key #'first))))))
+  (flet ((add-entry (map key val prio)
+           (when (or (null (gethash key map))
+                     (< prio (second (gethash key map))))
+             (setf (gethash key map) (list val prio))))
+         (to-list (map &aux acc)
+           (maphash (lambda (k v)
+                      (push (list k (first v)) acc))
+                    map)
+           acc))
+
+    (with-open-file (in path)
+      (loop WITH unicode->bytes = (make-hash-table)
+            WITH bytes->unicode = (make-hash-table :test #'equalp)
+            FOR unicode = (read in nil nil)
+            WHILE unicode
+            FOR bytes = (to-bytes (read in))
+            FOR prio = (read in)
+        DO
+        (add-entry unicode->bytes unicode bytes prio)
+        (add-entry bytes->unicode bytes unicode prio)
+        FINALLY
+        (return (values (sort (to-list unicode->bytes) #'< :key #'first)
+                        (sort (to-list bytes->unicode) #'bytes< :key #'first)))))))
 
 (defun gen-from-source (name bytes->uni)
   (dabase:build bytes->uni "uni2bytes.idx")

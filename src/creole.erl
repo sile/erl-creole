@@ -33,7 +33,7 @@ to_string(Bytes, Encoding, ErrFn) ->
     end.
 
 replace(Char) ->
-    fun (<<_:1/binary, Rest/binary>>) ->
+    fun (<<_, Rest/binary>>) ->
             {Char, Rest, true};
         ([_|Rest]) ->
             {Char, Rest, true}

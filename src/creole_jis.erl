@@ -9,7 +9,7 @@ from_string_impl([], ErrFn, Mode, Acc) when Mode=/=ascii ->
     from_string_impl([], ErrFn, ascii, [<<"\e(B">>|Acc]);
 from_string_impl([], _, _, Acc) ->
     binary:list_to_bin(lists:reverse(Acc));
-from_string_impl([C|Rest], ErrFn, Mode, Acc) when C =< 16#FF ->
+from_string_impl([C|Rest], ErrFn, Mode, Acc) when C < 16#80 ->
     case Mode of
         ascii ->
             from_string_impl(Rest, ErrFn, ascii, [C|Acc]);
@@ -65,20 +65,20 @@ to_string_impl(Bytes, ErrFn, Mode, Acc) ->
             to_string_impl2(Bytes, ErrFn, Mode, Acc)
     end.
 
-to_string_impl2(<<B:1/binary, Rest/binary>>=Bytes, ErrFn, ascii, Acc) ->
-    case binary:first(B) of
-        C when C =< 16#FF -> 
+to_string_impl2(<<C, Rest/binary>>=Bytes, ErrFn, ascii, Acc) ->
+    case C of
+        _ when C < 16#80 -> 
             to_string_impl(Rest, ErrFn, ascii, [C | Acc]);
         _ ->
             handle_error(Bytes, ErrFn, ascii, Acc)
     end;
-to_string_impl2(<<B:1/binary, Rest/binary>>=Bytes, ErrFn, roman, Acc) ->
-    case binary:first(B) of
+to_string_impl2(<<C, Rest/binary>>=Bytes, ErrFn, roman, Acc) ->
+    case C of
         $\ ->
             to_string_impl(Rest, ErrFn, ascii, [65509 | Acc]); % FULLWIDTH_YEN_SIGN
         $~ ->
             to_string_impl(Rest, ErrFn, ascii, [65507 | Acc]); % FULLWIDTH_MACRON
-        C when C =< 16#FF -> 
+        C when C < 16#80 -> 
             to_string_impl(Rest, ErrFn, ascii, [C | Acc]);
         _ ->
             handle_error(Bytes, ErrFn, roman, Acc)
