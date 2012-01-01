@@ -34,7 +34,7 @@ to_string(Bytes, Encoding, ErrFn) ->
 
 replace(Char) ->
     fun (<<_:1/binary, Rest/binary>>) ->
-            {Char, Rest};
+            {Char, Rest, true};
         ([_|Rest]) ->
-            {Char, Rest}
+            {Char, Rest, true}
     end.

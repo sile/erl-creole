@@ -14,6 +14,7 @@ to_string_impl(Bytes, ErrFn, Isoreg, Acc) ->
     case Bytes of
         <<"\e(B", Rest/binary>> ->  % ASCII
             to_string_impl(Rest, ErrFn, ascii, Acc);
+        
         <<"\e$B", Rest/binary>> ->  % JIS X 0208-1983
             to_string_impl(Rest, ErrFn, jisx_0208_1983, Acc);
         _ ->

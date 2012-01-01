@@ -15,11 +15,21 @@ to_string_impl(Bytes, Fn, Acc) ->
         Str when is_list(Str) ->
             [Str | Acc];
         {error, Str, Rest} -> 
-            {S, Rest2} = Fn(Rest),
-            to_string_impl(Rest2, Fn, [S, Str | Acc]);
+            {S, Rest2, Continue} = Fn(Rest),
+            case Continue of
+                true ->
+                    to_string_impl(Rest2, Fn, [S, Str | Acc]);
+                false ->
+                    {abort, to_string_impl([], Fn, [S, Str | Acc]), Rest2}
+            end;
         {imcomplate, Str, Rest} = S ->
-            {S, Rest2} = Fn(Rest),
-            to_string_impl(Rest2, Fn, [S, Str | Acc])
+            {S, Rest2, Continue} = Fn(Rest),
+            case Continue of
+                true ->
+                    to_string_impl(Rest2, Fn, [S, Str | Acc]);
+                false ->
+                    {abort, to_string_impl([], Fn, [S, Str | Acc]), Rest2}
+            end
     end.
 
 from_string(String, Fn) when is_list(String) ->
@@ -30,6 +40,11 @@ from_string_impl(String, Fn, Acc) ->
         Bin when is_binary(Bin) ->
             [Bin | Acc];
         {error, Bin, Rest} ->
-            {S, Rest2} = Fn(Rest),
-            from_string_impl(Rest2, Fn, [S, Bin | Acc])
+            {S, Rest2, Continue} = Fn(Rest),
+            case Continue of
+                true ->
+                    from_string_impl(Rest2, Fn, [S, Bin | Acc]);
+                false ->
+                    {abort, from_string_impl(Rest2, Fn, [S, Bin | Acc]), Rest2}
+            end
     end.

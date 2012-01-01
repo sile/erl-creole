@@ -17,8 +17,13 @@ from_string_impl([], _, _, Acc) ->
 from_string_impl([Code|Rest]=String, ToBytes, ErrFn, Acc) ->
     case ToBytes(Code) of
         fail -> 
-            {S, Rest2} = ErrFn(String),
-            from_string_impl(Rest2, ToBytes, ErrFn, [S | Acc]);
+            {S, Rest2, Continue} = ErrFn(String),
+            case Continue of
+                true ->
+                    from_string_impl(Rest2, ToBytes, ErrFn, [S | Acc]);
+                false ->
+                    {abort, from_string_impl([], ToBytes, ErrFn, [S | Acc]), Rest2}
+            end;
         Bytes ->
             from_string_impl(Rest, ToBytes, ErrFn, [Bytes | Acc])
     end.
@@ -40,8 +45,13 @@ to_string_impl(<<0:8/binary, Rest/binary>>, Nodes, ErrFn, Acc) ->
 to_string_impl(Bytes, Nodes, ErrFn, Acc) ->
     case to_unicode(Bytes, Nodes, 0) of
         fail ->
-            {S, Rest} = ErrFn(Bytes),
-            to_string_impl(Rest, Nodes, ErrFn, [S | Acc]);
+            {S, Rest, Continue} = ErrFn(Bytes),
+            case Continue of
+                true ->
+                    to_string_impl(Rest, Nodes, ErrFn, [S | Acc]);
+                false ->
+                    {abort, to_string_impl(<<>>, Nodes, ErrFn, [S | Acc]), Rest}
+            end;
         {Unicode, Rest} ->
             to_string_impl(Rest, Nodes, ErrFn, [Unicode | Acc])
     end.
