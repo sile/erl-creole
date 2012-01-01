@@ -1,0 +1,7 @@
+
+- JIS_X_0201: ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/JIS/JIS0201.TXT
+- JIS_X_0208: ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/JIS/JIS0208.TXT
+- JIS_X_0212: ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/JIS/JIS0212.TXT
+
+
+- JIS_X_0208(1983): http://source.icu-project.org/repos/icu/data/trunk/charset/data/ucm/aix-JISX0208.1983_0-4.3.6.ucm
