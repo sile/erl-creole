@@ -46,6 +46,13 @@
 　- ResultString:binary()# 変換後の文字列
 
 
+[参考]
+・ユニコードと他のエンコーディングのマッピング:
+　・http://source.icu-project.org/repos/icu/data/trunk/charset/data/ucm/
+・JIS(ISO-2022-JP):
+　・http://www.tohoho-web.com/wwwkanji.htm
+
+
 [TODO]
 ・テスト
 ・ISO-2022-JPの'JIS-X-0208-1978'に対応

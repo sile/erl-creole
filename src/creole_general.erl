@@ -1,7 +1,6 @@
 -module(creole_general).
 
--export([to_string/3,
-         from_string/3]).
+-export([to_string/3, from_string/3]).
 
 from_string(String, Encoding, ErrFn) ->
     ToBytes = case Encoding of
@@ -28,7 +27,6 @@ from_string_impl([Code|Rest]=String, ToBytes, ErrFn, Acc) ->
         Bytes ->
             from_string_impl(Rest, ToBytes, ErrFn, [Bytes | Acc])
     end.
-
 
 to_string(Bytes, Encoding, ErrFn) ->
     Nodes = case Encoding of
@@ -73,7 +71,9 @@ to_unicode(<<Arc,Bytes/binary>>, Nodes, NodeIndex) ->
         _ ->
             fail
     end.
-            
+
+%%%%%%
+%%% DoubleArray Node Accessors        
 base(Nodes, Index) ->
     element(Index+1, Nodes) band 16#00FFFFFF.
 
