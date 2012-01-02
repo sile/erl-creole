@@ -1,4 +1,5 @@
 ;;; ライブラリ読み込み
+;;; - dabase: https://github.com/sile/dabase
 (require :asdf)
 (asdf:load-system :dabase)
 
