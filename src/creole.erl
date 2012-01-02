@@ -15,6 +15,7 @@ from_string(String, Encoding, ErrFn) ->
     case Encoding of
         utf8 -> creole_utf8:from_string(String, ErrFn);
         jis -> creole_jis:from_string(String, ErrFn);
+        iso_2022_jp_1 -> creole_iso_2022_jp_1:from_string(String, ErrFn);
         _ -> creole_general:from_string(String, Encoding, ErrFn)
     end.
 
@@ -31,6 +32,7 @@ to_string(Bytes, Encoding, ErrFn) ->
     case Encoding of
         utf8 -> creole_utf8:to_string(Bytes, ErrFn);
         jis -> creole_jis:to_string(Bytes, ErrFn);
+        iso_2022_jp_1 -> creole_iso_2022_jp_1:to_string(Bytes, ErrFn);
         _ -> creole_general:to_string(Bytes, Encoding, ErrFn)
     end.
 

@@ -1,4 +1,4 @@
--module(creole_jis).
+-module(creole_iso_2022_jp_1).
 
 -export([from_string/2, to_string/2]).
 
@@ -6,6 +6,7 @@
 -define(ESC_ROMAN, "\e(J").
 -define(ESC_JISX_0208_1978, "\e$@").
 -define(ESC_JISX_0208_1983, "\e$B").
+-define(ESC_JISX_0212_1990, "\e$(D").
 
 from_string(String, ErrFn) ->
     from_string_impl(String, ErrFn, ascii, []).
@@ -22,8 +23,8 @@ from_string_impl([C|Rest], ErrFn, Mode, Acc) when C < 16#80 ->
             from_string_impl(Rest, ErrFn, ascii, [C,?ESC_ASCII|Acc])
     end;
 from_string_impl([C|Rest]=Str, ErrFn, Mode, Acc) ->
-    case {creole_to_jisx_0208_1983:to_bytes(C), Mode} of
-        {fail, _} -> 
+    case try_convert(C) of
+        fail -> 
             {S, Rest2, Continue} = ErrFn(Str),
             S2 = case Mode of
                      ascii -> S;
@@ -35,10 +36,31 @@ from_string_impl([C|Rest]=Str, ErrFn, Mode, Acc) ->
                 false ->
                     {abort, from_string_impl([], ErrFn, ascii, [S2|Acc]), Rest2}
             end;
-        {Bytes, jisx_0208_1983} ->
-            from_string_impl(Rest, ErrFn, jisx_0208_1983, [Bytes|Acc]);
-        {Bytes, _} ->
-            from_string_impl(Rest, ErrFn, jisx_0208_1983, [Bytes,?ESC_JISX_0208_1983|Acc])
+        {jisx_0208_1983, Bytes} ->
+            case Mode of
+                jisx_0208_1983 ->
+                    from_string_impl(Rest, ErrFn, jisx_0208_1983, [Bytes|Acc]);
+                _ ->
+                    from_string_impl(Rest, ErrFn, jisx_0208_1983, [Bytes,?ESC_JISX_0208_1983|Acc])
+            end;
+        {jisx_0212_1990, Bytes} ->
+            case Mode of
+                jisx_0208_1990 ->
+                    from_string_impl(Rest, ErrFn, jisx_0208_1990, [Bytes|Acc]);
+                _ ->
+                    from_string_impl(Rest, ErrFn, jisx_0208_1990, [Bytes,?ESC_JISX_0212_1990|Acc])
+            end
+    end.
+
+try_convert(Code) ->
+    case creole_to_jisx_0208_1983:to_bytes(Code) of
+        fail ->
+            case creole_to_jisx_0212_1990:to_bytes(Code) of
+                fail -> fail;
+                Bytes -> {jisx_0212_1990, Bytes}
+            end;
+        Bytes ->
+            {jisx_0208_1983, Bytes}
     end.
 
 to_string(Bytes, ErrFn) ->
@@ -65,6 +87,10 @@ to_string_impl(Bytes, ErrFn, Mode, Acc) ->
         <<?ESC_JISX_0208_1983, Rest/binary>> ->  
             to_string_impl(Rest, ErrFn, jisx_0208_1983, Acc);
 
+        %% JIS X 0212-1990
+        <<?ESC_JISX_0212_1990, Rest/binary>> ->
+            to_string_impl(Rest, ErrFn, jisx_0212_1990, Acc);
+        
         %% Non Escape sequence
         _ ->
             to_string_impl2(Bytes, ErrFn, Mode, Acc)

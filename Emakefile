@@ -1,3 +1,4 @@
 {["src/*",
-  "src/mapping/*"],
+  "src/mapping/*",
+  "sample/*"],
  [{outdir, "ebin"}]}.

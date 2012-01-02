@@ -13,14 +13,14 @@
 　ユニコード文字列を指定のエンコーディングのマルチバイト文字列に変換する。
 　変換不能な文字に遭遇した場合は $? が代わりに使用される。
 　- InputString:string()# 入力文字列
-　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis
+　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis, iso_2022_jp_1
 　- ResultString:binary()# 変換後の文字列(バイナリ)
 
 ・creole:from_string(InputString, Encoding, ErrorFun) -> ResultString | {abort, PartialResultString, RestString}
 　ユニコード文字列を指定のエンコーディングのマルチバイト文字列に変換する。
 　変換不能な文字に遭遇した場合は ErrorFun が呼び出される。
 　- InputString:string()# 入力文字列
-　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis
+　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis, iso_2022_jp_1
 　- ErrorFun:function()# 変換不能な文字に遭遇した場合に呼び出される関数。
 　　　                   ErrorFun(変換不能な入力文字列) ->
                    　　　　{代替文字/文字列:iodata(), 残りの入力文字列, 変換を続行するか}.
@@ -31,14 +31,14 @@
 　指定のエンコーディングのマルチバイト文字列(バイナリ)をユニコード文字列に変換する。
 　変換不能な文字列に遭遇した場合は $? が代わりに使用される。
 　- InputString:binary()|string()# 入力マルチバイト文字列
-　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis
+　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis, iso_2022_jp_1
 　- ResultString:string()# 変換後の文字列
 
 ・creole:to_string(InputString, Encoding, ErrorFun) -> ResultString | {abort, PartialResultString, RestString}
 　指定のエンコーディングのマルチバイト文字列(バイナリ)をユニコード文字列に変換する。
 　変換不能な文字に遭遇した場合は ErrorFun が呼び出される。
 　- InputString:string()# 入力マルチバイト文字列
-　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis
+　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis, iso_2022_jp_1
 　- ErrorFun:function()# 変換不能な文字に遭遇した場合に呼び出される関数。
 　　　                   ErrorFun(変換不能な入力文字列) ->
                    　　　　{代替文字/文字列:iodata(), 残りの入力文字列, 変換を続行するか}.
@@ -46,14 +46,21 @@
 　- ResultString:binary()# 変換後の文字列
 
 
+[変換テーブルの自動生成]
+・src/mapping/以下のソースは自動生成されたもの
+　・詳細は gensrc/README を参照
+
+
 [参考]
 ・ユニコードと他のエンコーディングのマッピング:
 　・http://source.icu-project.org/repos/icu/data/trunk/charset/data/ucm/
+　・ftp://ftp.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/JIS/  #OBSOLETE
 ・JIS(ISO-2022-JP):
 　・http://www.tohoho-web.com/wwwkanji.htm
 
 
 [TODO]
 ・テスト
-・ISO-2022-JPの'JIS-X-0208-1978'に対応
+・JIS(ISO-2022-JP)およびISO-2022-JP-1の'JIS-X-0208-1978'に対応
 　=> 現状'JIS-X-0208-1983'で代替
+・dabaseの整理
