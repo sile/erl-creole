@@ -1,7 +1,7 @@
 [概要]
 ・ユニコード文字列とマルチバイト文字列(バイナリ)の相互変換を行う
 ・対応エンコーディング:
-　・UTF-8, Shift_JIS, CP932, EUC-JP, eucJP-ms, JIS(ISO-2022-JP)
+　・UTF-8, Shift_JIS, CP932, EUC-JP, eucJP-ms, JIS(ISO-2022-JP), ISO-2022-JP-1
 
 
 [バージョン]
