@@ -34,7 +34,7 @@
 　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis
 　- ResultString:string()# 変換後の文字列
 
-・creole:from_string(InputString, Encoding, ErrorFun) -> ResultString | {abort, PartialResultString, RestString}
+・creole:to_string(InputString, Encoding, ErrorFun) -> ResultString | {abort, PartialResultString, RestString}
 　指定のエンコーディングのマルチバイト文字列(バイナリ)をユニコード文字列に変換する。
 　変換不能な文字に遭遇した場合は ErrorFun が呼び出される。
 　- InputString:string()# 入力マルチバイト文字列
