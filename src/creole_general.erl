@@ -42,7 +42,7 @@ to_string(Bytes, Encoding, ErrFn) ->
 
 to_string_impl(<<>>, _, _, Acc) ->
     lists:flatten(lists:reverse(Acc));
-to_string_impl(<<$0, Rest/binary>>, Nodes, ErrFn, Acc) ->
+to_string_impl(<<0, Rest/binary>>, Nodes, ErrFn, Acc) ->
     to_string_impl(Rest, Nodes, ErrFn, [0|Acc]);
 to_string_impl(Bytes, Nodes, ErrFn, Acc) ->
     case to_unicode(Bytes, Nodes, 0) of

@@ -1,0 +1,8 @@
+[概要]
+・gensrc.lisp
+　・erl-creoleで使用する各々のエンコーディングの変換表(Erlangソース)を自動生成するためのcommon lispスクリプト
+
+[使用方法]
+$ cd gensrc
+$ sbcl --script gensrc.lisp エンコーディング名 mapping/マッピング定義ファイル
+$ mv *.erl ../src/mapping/    # 生成されたErlangファイルをソースディレクトリに移動する

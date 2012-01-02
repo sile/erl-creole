@@ -1,14 +1,19 @@
+;;; ライブラリ読み込み
 (require :asdf)
-
 (asdf:load-system :dabase)
 
+
+;;; 各種関数定義
 (deftype simple-octets () '(simple-array (unsigned-byte 8) (*)))
+
+;; 整数をバイト列(ビックエンディアン)に変換する
 (defun to-bytes (code)
   (coerce
    (loop FOR i FROM (max 0 (1- (ceiling (integer-length code) 8))) DOWNTO 0
          COLLECT (ldb (byte 8 (* i 8)) code))
    'simple-octets))
 
+;; バイト列の比較関数
 (defun bytes< (as bs)
   (loop FOR a ACROSS as
         FOR b ACROSS bs
@@ -18,12 +23,16 @@
     FINALLY
     (return (< (length as) (length bs)))))
 
+;; 入力ストリームからNバイト整数を読み込む(ビッグエンディアン)
 (defun read-uint (byte-width in)
   (loop FOR i FROM (1- byte-width) DOWNTO 0
         SUM (ash (read-byte in) (* i 8))))
 
+;; マッピング(変換)定義ファイルを読み込む
+;; => (values unicode->bytes:(list fixnum vector) bytes->unicode:(list vector fixnum))
 (defun read-mapping (path)
   (flet ((add-entry (map key val prio)
+           ;; キーがユニークになるようにチェックする (重複する場合は優先度の高い方を採用)
            (when (or (null (gethash key map))
                      (< prio (second (gethash key map))))
              (setf (gethash key map) (list val prio))))
@@ -47,6 +56,7 @@
         (return (values (sort (to-list unicode->bytes) #'< :key #'first)
                         (sort (to-list bytes->unicode) #'bytes< :key #'first)))))))
 
+;; バイト列からユニコード文字列に変換するためのErlangモジュールを生成する
 (defun gen-from-source (name bytes->uni)
   (dabase:build bytes->uni "uni2bytes.idx")
   (let ((nodes
@@ -58,6 +68,7 @@
            (delete-file "uni2bytes.idx")))
         (module (format nil "creole_from_~a" name)))
 
+    (format t "~& generate: ~a~%" (format nil "~a.erl" module))
     (with-open-file (out (format nil "~a.erl" module) 
                          :direction :output :if-exists :supersede)
       (format out "-module(~a).~%" module)
@@ -74,8 +85,10 @@
         (format out "16#~8,'0x" n))
       (format out "~&  }.~%"))))
 
+;; ユニコード文字列からバイト列に変換するためのErlangモジュールを生成する
 (defun gen-to-source (name uni->bytes)
   (let ((module (format nil "creole_to_~a" name)))
+    (format t "~& generate: ~a~%" (format nil "~a.erl" module))
     (with-open-file (out (format nil "~a.erl" module)
                          :direction :output :if-exists :supersede)
       (format out "-module(~a).~%" module)
@@ -93,15 +106,18 @@
       (format out "~&    _ -> fail")
       (format out "~&  end.~%"))))
 
-(setf *print-length* 300)
+
+;;; 引数取得
+(when (/= (length sb-ext:*posix-argv*) 3)
+  (format t "~& Usage: sbcl --script gensrc.lisp ENCODING_NAME MAPPING_DEF_FILE~2%")
+  (sb-ext:quit))
+
 (defvar *encoding-name* (second sb-ext:*posix-argv*))
 (defvar *mapping-file* (third sb-ext:*posix-argv*))
 
+;;; 実行
 (multiple-value-bind (uni->bytes bytes->uni)
                      (read-mapping *mapping-file*)
   (gen-from-source *encoding-name* bytes->uni)
   (gen-to-source *encoding-name* uni->bytes)
-  'done)
-
-;; TODO: 512以下だとエラーになる
-;;  (dabase:build (subseq *bytes->uni* 0 100) "uni2bytes.idx")
+  (format t "DONE~2%"))
