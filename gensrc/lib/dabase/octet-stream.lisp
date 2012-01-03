@@ -11,7 +11,7 @@
            null-octet))
 (in-package :dabase.octet-stream)
 
-(defconstant null-octet 0) ; xxx:
+(defconstant null-octet 0) 
 
 (defgeneric make (seq &key start end))
 (defgeneric make-impl (type seq &key start end))

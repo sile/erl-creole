@@ -6,6 +6,9 @@
 (defun load (index-file)
   (dabase.searcher:load index-file))
 
+(defun element-count (da)
+  (dabase.searcher:element-count da))
+
 (defun member? (key da &key (start 0) (end (length key)))
   (dabase.searcher:member? key da start end))
 

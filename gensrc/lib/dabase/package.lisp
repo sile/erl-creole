@@ -3,6 +3,7 @@
   (:shadow :common-lisp get load)
   (:export build
            load
+           element-count
            member?
            get
            each-common-prefix))

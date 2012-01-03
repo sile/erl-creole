@@ -2,6 +2,7 @@
   (:use :common-lisp)
   (:shadow :common-lisp get load)
   (:export load
+           element-count
            member?
            get
            each-common-prefix))
@@ -9,10 +10,6 @@
 
 (eval-when (:compile-toplevel :load-toplevel)
   (rename-package :dabase.octet-stream :dabase.octet-stream '(:octet-stream)))
-
-(defun read-uint (byte-width in)
-  (loop FOR i FROM (1- byte-width) DOWNTO 0
-        SUM (ash (read-byte in) (* i 8))))
 
 (deftype node () '(unsigned-byte 32))
 
@@ -24,6 +21,10 @@
   (print-unreadable-object (o stream :identity t)
     (format stream "~a ~s ~a" :da :count (da-entry-count o))))
 
+(defun read-uint (byte-width in)
+  (loop FOR i FROM (1- byte-width) DOWNTO 0
+        SUM (ash (read-byte in) (* i 8))))
+
 (defun read-nodes (count in)
   (let ((nodes (make-array count :element-type 'node)))
     (dotimes (i count nodes)
@@ -34,6 +35,9 @@
     (let ((count (read-uint 4 in)))
       (make-da :entry-count (read-uint 4 in)
                :nodes (read-nodes count in)))))
+
+(defun element-count (da)
+  (da-entry-count da))
 
 (defun base (da node)
   (ldb (byte 24 0) (aref (da-nodes da) node)))

@@ -1,0 +1,55 @@
+[概要]
+・Common LispでのDoubleArrayの実装
+・BASEの型が(unsigned-byte 24)のため、格納可能な要素数の上限は数百万程度
+
+[バージョン]
+・0.0.1
+
+
+[API]
+PACKAGE# dabase
+　メインパッケージ
+
+FUNCTION# (build entries output-file) -> :done
+　キーと値のペアのリストを受け取り、DouleArrayを構築してファイルに書き出す
+　- entries: キーと値のペア。キーはソート済みかつユニークである必要がある。
+　           キーの型はstring or (array (unsigned-byte 8))。
+　             ※ キーにはヌル文字(0)および255を含めることができない
+             値の型は(unsigined-byte 24)
+　- output-file: 構築したDoubleArrayを出力するファイルのパス
+
+FUNCTION# (load index-file-path) -> da
+　DoubleArrayをファイルから読み込む
+　- index-file-path: build関数で構築したDoubleArrayの保存ファイル
+　- da: 読み込んだDoubleArray
+
+FUNCTION# (element-count da) -> fixnum
+　DoubleArrayに格納されている要素数を返す
+　- da: DoubleArray
+
+FUNCTION# (member? key da &key (start 0) (end (length key))) -> boolean
+　指定のキーがDoubleArrayに格納されているかどうかを判定する
+　- key: 検索に用いるキー。string or (array (unsigned-byte 8))
+　- da: DoubleArray
+　- start: key内の開始位置
+　- end: key内の終端位置
+
+FUNCTION# (get key da &key (start 0) (end (length key))) -> nil or fixnum
+　指定のキーに紐付く値を取得する。キーが存在しない場合はnilが返る
+　- key: 検索に用いるキー。string or (array (unsigned-byte 8))
+　- da: DoubleArray
+　- start: key内の開始位置
+　- end: key内の終端位置
+
+MACRO# (each-common-prefix (value position) 
+                           (key da &key (start 0) (end (length key)))
+                           &body body) -> nil
+　共通接頭辞検索を行う
+　接頭辞がマッチする全てのキーに対して、値とマッチ位置をそれぞれvalue、position変数に束縛して、bodyを実行する
+　- value: 接頭辞がマッチしたキーの値が束縛される変数。body評価時に使用される
+　- position: キーのマッチ位置が束縛される変数。body評価時に使用される
+　- key: 検索に用いるキー。string or (array (unsigned-byte 8))
+　- da: DoubleArray
+　- start: key内の開始位置
+　- end: key内の終端位置
+　- body: 接頭辞がマッチするキーが見つかった場合に評価・実行される式

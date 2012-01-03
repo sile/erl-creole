@@ -11,15 +11,12 @@
 
 (defconstant +EMPTY+ #xFFFFFFFF)
 
-#|
-DA & NODE
-|#
+;;;;;;;;;;;;;
+;;; da & node
 (defstruct da
   (nodes #() :type (simple-array node))
   (entries #() :type simple-vector)
   (alloca t :type node-allocator:node-allocator))
-(defmethod print-object ((o da) stream)
-  (print-unreadable-object (o stream :identity t :type t)))
 
 (defun init-da (entries)
   (make-da :nodes (make-array 64 :element-type 'node :initial-element +EMPTY+)
@@ -69,9 +66,8 @@ DA & NODE
           (get-chck da next-index) arc)
     next-index))
 
-#|
-BUILD
-|#
+;;;;;;;;;
+;;; build
 (defun end-of-same-node (da beg end)
   (loop WITH ch = (octet-stream:read (get-key da beg))
         FOR cur FROM (1+ beg) BELOW end
@@ -102,14 +98,12 @@ BUILD
       FINALLY
       (setf children (nreverse children)
             ranges (nreverse (cons end ranges))))
-;    (print `(:c ,children))
-;    (sleep 1)
+
     (let ((base-node-index (node-alloc da children)))
       (loop FOR child IN children
             FOR child-beg IN ranges
             FOR child-end IN (cdr ranges)
         DO
-;        (print (list :r child-beg child-end))
         (build-impl da child-beg child-end (set-node da root-node-index base-node-index child))))))
 
 (defun build-impl (da beg end root-node-index) 
@@ -120,9 +114,8 @@ BUILD
       (build-leaf-case da beg root-node-index)
     (build-node-case da beg end root-node-index)))
 
-#|
-OUTPUT
-|#
+;;;;;;;;;;
+;;; output
 (defun write-uint (n byte-size out)
   (loop FOR i FROM (1- byte-size) DOWNTO 0
         DO
@@ -132,11 +125,12 @@ OUTPUT
   (with-open-file (out output-file :direction :output
                                    :element-type '(unsigned-byte 8)
                                    :if-exists :supersede)
-    (let ((end (+ (position-if-not (lambda (x) (= x +EMPTY+)) (da-nodes da) :from-end t) #x100)))
+    (let ((end (+ (position-if-not (lambda (x) (= x +EMPTY+)) (da-nodes da) :from-end t) 
+                  #x100)))
       (write-uint end 4 out)
       (write-uint entry-count 4 out)
       (loop FOR i FROM 0 BELOW end
-            FOR n = (aref (da-nodes da) i)
+            FOR n = (node-ref da i)
             DO (write-uint n 4 out)))))
 
 (eval-when (:compile-toplevel :load-toplevel)

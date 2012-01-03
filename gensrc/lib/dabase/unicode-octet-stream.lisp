@@ -5,12 +5,8 @@
            read
            peek
            eos?
-           position
-
-           null-octet))
+           position))
 (in-package :dabase.unicode-octet-stream)
-
-(defconstant null-octet 0)
 
 ;;;;;;;;
 ;;; type
@@ -58,7 +54,7 @@
 
 (defun peek (in)
   (when (eos? in)
-    (return-from peek null-octet))
+    (return-from peek dabase.octet-stream:null-octet))
 
   (with-slots (code octet-pos octet-len) (the octet-stream in)
     (if (= octet-pos octet-len)
@@ -86,7 +82,8 @@
   (prog1 (peek in)
     (eat in)))
 
-;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;
+;;; method
 (defmethod dabase.octet-stream:make-impl ((type (eql :string)) str &key start end)
   (make str :start (or start 0) :end (or end (length str))))
 
