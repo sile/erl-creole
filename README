@@ -5,7 +5,12 @@
 
 
 [バージョン]
-・0.0.1
+・0.0.2
+
+
+[更新履歴]
+・0.0.2
+　・convert関数追加
 
 
 [API]
@@ -26,6 +31,8 @@
                    　　　　{代替文字/文字列:iodata(), 残りの入力文字列, 変換を続行するか}.
                          {_, _, false}を返した場合は、関数全体の結果として{abort,_,_}が返る。
 　- ResultString:binary()# 変換後の文字列(バイナリ)
+　- PartialResultString:binary()# ErrorFunの結果が{_,_,false}の場合に返る。その時点までの変換結果文字列。
+　- RestString:string()# ErrorFunの結果が{_,_,false}の場合に返る。ErrorFunの返り値のタプルの二番目の値が使用される。
 
 ・creole:to_string(InputString, Encoding) -> ResultString
 　指定のエンコーディングのマルチバイト文字列(バイナリ)をユニコード文字列に変換する。
@@ -37,13 +44,37 @@
 ・creole:to_string(InputString, Encoding, ErrorFun) -> ResultString | {abort, PartialResultString, RestString}
 　指定のエンコーディングのマルチバイト文字列(バイナリ)をユニコード文字列に変換する。
 　変換不能な文字に遭遇した場合は ErrorFun が呼び出される。
-　- InputString:string()# 入力マルチバイト文字列
+　- InputString:binary()|string()# 入力マルチバイト文字列
 　- Encoding:atom()# エンコーディング方式。utf8, sjis, cp932, eucjp, eucjp_ms, jis, iso_2022_jp_1
 　- ErrorFun:function()# 変換不能な文字に遭遇した場合に呼び出される関数。
 　　　                   ErrorFun(変換不能な入力文字列) ->
                    　　　　{代替文字/文字列:iodata(), 残りの入力文字列, 変換を続行するか}.
                          {_, _, false}を返した場合は、関数全体の結果として{abort,_,_}が返る。
 　- ResultString:binary()# 変換後の文字列
+　- PartialResultString:string()# ErrorFunの結果が{_,_,false}の場合に返る。その時点までの変換結果文字列。
+　- RestString:binary()# ErrorFunの結果が{_,_,false}の場合に返る。ErrorFunの返り値のタプルの二番目の値が使用される。
+
+・creole:convert(InputString, FromEncoding, ToEncoding) -> ResultString
+　マルチバイト文字列を別のエンコーディングのマルチバイト文字列に変換する。
+　変換不能な文字列に遭遇した場合は $? が代わりに使用される。
+　- InputString:binary()|string()# 入力マルチバイト文字列
+　- FromEncoding:atom()# 入力文字列のエンコーディング。utf8, sjis, cp932, eucjp, eucjp_ms, jis, iso_2022_jp_1
+　- ToEncoding:atom()# 出力文字列のエンコーディング。utf8, sjis, cp932, eucjp, eucjp_ms, jis, iso_2022_jp_1
+　- ResultString:binary()# 変換後のマルチバイト文字列
+
+・creole:convert(InputString, FromEncoding, ToEncoding, ErrorFun) -> ResultString | {abort, PartialResultString, RestString}
+　マルチバイト文字列を別のエンコーディングのマルチバイト文字列に変換する。
+　変換不能な文字に遭遇した場合は ErrorFun が呼び出される。
+　- InputString:binary()|string()# 入力マルチバイト文字列
+　- FromEncoding:atom()# 入力文字列のエンコーディング。utf8, sjis, cp932, eucjp, eucjp_ms, jis, iso_2022_jp_1
+　- ToEncoding:atom()# 出力文字列のエンコーディング。utf8, sjis, cp932, eucjp, eucjp_ms, jis, iso_2022_jp_1
+　- ErrorFun:function()# 変換不能な文字に遭遇した場合に呼び出される関数。
+　　　                   ErrorFun(変換不能な入力文字列:binary()|string()) ->
+                   　　　　{代替文字/文字列:iodata(), 残りの入力文字列, 変換を続行するか}.
+                         {_, _, false}を返した場合は、関数全体の結果として{abort,_,_}が返る。
+　- ResultString:binary()# 変換後のマルチバイト文字列
+　- PartialResultString:binary()|string()# ErrorFunの結果が{_,_,false}の場合に返る。その時点までの変換結果文字列。
+　- RestString:binary()|string()# ErrorFunの結果が{_,_,false}の場合に返る。ErrorFunの返り値のタプルの二番目の値が使用される。
 
 
 [変換テーブルの自動生成]

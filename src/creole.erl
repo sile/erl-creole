@@ -2,7 +2,18 @@
 
 -export([from_string/2, from_string/3,
          to_string/2, to_string/3,
+         convert/3,
          replace/1]).
+
+%% マルチバイト文字列を別のエンコーディングのマルチバイト文字列に変換する
+%% 変換不能な文字列は"?"で代替される
+convert(Bytes, FromEncoding, ToEncoding) ->
+    convert(Bytes, FromEncoding, ToEncoding, replace($?)).
+
+%% マルチバイト文字列を別のエンコーディングのマルチバイト文字列に変換する
+%% 変換不能な文字に遭遇した場合の挙動は ErrFn によって制御される
+convert(Bytes, FromEncoding, ToEncoding, ErrFn) ->
+    from_string(to_string(Bytes, FromEncoding, ErrFn), ToEncoding, ErrFn).
 
 %% ユニコード文字列から指定のマルチバイト文字列(バイナリ)に変換する
 %% 変換不能な文字は"?"で代替される
